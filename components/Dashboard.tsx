@@ -1,7 +1,7 @@
 import React from 'react';
-import { AnalysisResult, MarketGap, Skill } from '../types';
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import { CheckCircle2, AlertCircle, BookOpen, ExternalLink, ArrowRight, PlayCircle } from 'lucide-react';
+import { AnalysisResult, Skill } from '../types';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import { CheckCircle2, BookOpen, ExternalLink, ArrowRight, PlayCircle } from 'lucide-react';
 import ChatBot from './ChatBot';
 import GamificationPanel from './GamificationPanel';
 import ResumeBuilder from './ResumeBuilder';
@@ -10,17 +10,11 @@ interface DashboardProps {
   data: AnalysisResult;
   currentSkills: Skill[];
   onReset: () => void;
+  onOpenProfile: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset, onOpenProfile }) => {
   
-  // Transform data for charts
-  const radarData = data.topSkillsRequired.map(skill => ({
-    subject: skill.name,
-    A: skill.frequency, // Market Demand
-    fullMark: 100,
-  }));
-
   const getImportanceColor = (imp: string) => {
     switch (imp) {
       case 'Critical': return 'text-red-400 bg-red-400/10 border-red-400/20';
@@ -73,39 +67,33 @@ const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) =
       </div>
 
       {/* Gamification Panel */}
-      <GamificationPanel data={data} />
+      <GamificationPanel data={data} onOpenProfile={onOpenProfile} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Market Demand Visualization */}
+        {/* Market Demand Visualization (Replaced Chart with Clean List) */}
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
             Market Skill Demand
           </h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={radarData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                <XAxis type="number" domain={[0, 100]} hide />
-                <YAxis dataKey="subject" type="category" stroke="#94a3b8" width={100} tick={{fill: '#94a3b8'}} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} 
-                  itemStyle={{ color: '#818cf8' }}
-                  cursor={{fill: 'transparent'}}
-                />
-                <Bar dataKey="A" radius={[0, 4, 4, 0]} barSize={20}>
-                  {radarData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill="url(#colorGradient)" />
-                  ))}
-                </Bar>
-                <defs>
-                  <linearGradient id="colorGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#6366f1" />
-                    <stop offset="100%" stopColor="#8b5cf6" />
-                  </linearGradient>
-                </defs>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="space-y-5 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+            {data.topSkillsRequired.map((skill, index) => (
+              <div key={index} className="group">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="font-medium text-slate-200 text-sm">{skill.name}</span>
+                  <span className="text-indigo-400 font-bold text-xs">{skill.frequency}% Demand</span>
+                </div>
+                <div className="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-indigo-600 to-violet-500 rounded-full transition-all duration-1000 ease-out group-hover:from-indigo-500 group-hover:to-violet-400 relative"
+                    style={{ width: `${skill.frequency}%` }}
+                  >
+                     <div className="absolute inset-0 bg-white/10 animate-[shimmer_2s_infinite]"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -115,9 +103,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) =
             <span className="w-1 h-6 bg-red-500 rounded-full"></span>
             Critical Skill Gaps
           </h3>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar max-h-[300px]">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar max-h-[350px]">
             {data.gaps.map((gap, idx) => (
-              <div key={idx} className="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+              <div key={idx} className="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-semibold text-slate-200">{gap.skillName}</span>
                   <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getImportanceColor(gap.importance)}`}>

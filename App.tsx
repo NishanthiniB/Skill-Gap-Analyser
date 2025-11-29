@@ -145,7 +145,8 @@ const App: React.FC = () => {
           <Dashboard 
             data={analysisResult} 
             currentSkills={currentSkills}
-            onReset={handleReset} 
+            onReset={handleReset}
+            onOpenProfile={() => setIsProfileOpen(true)}
           />
         )}
 
