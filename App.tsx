@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AnalysisResult, AppState, Skill, User } from './types';
 import { analyzeSkillGap } from './services/geminiService';
-import { calculateBadges, saveBadges } from './services/gamificationService';
 import { authService } from './services/authService';
 import AnalysisInput from './components/AnalysisInput';
 import Dashboard from './components/Dashboard';
-import ProfileModal from './components/ProfileModal';
 import AuthScreen from './components/AuthScreen';
 import { Compass, Github, AlertTriangle, User as UserIcon, LogOut } from 'lucide-react';
 
@@ -15,7 +13,6 @@ const App: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [currentSkills, setCurrentSkills] = useState<Skill[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>('');
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   useEffect(() => {
     // Check for existing session on mount
@@ -33,7 +30,6 @@ const App: React.FC = () => {
     authService.logout();
     setUser(null);
     handleReset();
-    setIsProfileOpen(false);
   };
 
   const handleAnalyze = async (role: string, skills: Skill[], context: string) => {
@@ -44,10 +40,6 @@ const App: React.FC = () => {
     try {
       const result = await analyzeSkillGap(role, skills, context);
       
-      // Save earned badges to local storage for the current user
-      const earnedBadges = calculateBadges(result);
-      saveBadges(user.id, earnedBadges);
-
       setAnalysisResult(result);
       setAppState(AppState.RESULTS);
     } catch (error) {
@@ -83,17 +75,15 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
              <span className="text-xs text-slate-500 hidden sm:inline">Powered by Gemini 2.5 Flash</span>
              
-             {/* Profile Button */}
-             <button 
-              onClick={() => setIsProfileOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-slate-700"
-              title="Your Profile"
+             {/* Profile Display (Static) */}
+             <div 
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-full border border-slate-700 cursor-default"
              >
                 <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center">
                   <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
                 </div>
                 <span className="text-sm font-medium text-slate-300 hidden md:block">{user.name}</span>
-             </button>
+             </div>
 
              {/* Logout Button */}
              <button
@@ -110,8 +100,6 @@ const App: React.FC = () => {
           </div>
         </div>
       </nav>
-
-      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -146,7 +134,6 @@ const App: React.FC = () => {
             data={analysisResult} 
             currentSkills={currentSkills}
             onReset={handleReset}
-            onOpenProfile={() => setIsProfileOpen(true)}
           />
         )}
 

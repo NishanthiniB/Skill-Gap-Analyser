@@ -1,19 +1,16 @@
 import React from 'react';
 import { AnalysisResult, Skill } from '../types';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { CheckCircle2, BookOpen, ExternalLink, ArrowRight, PlayCircle } from 'lucide-react';
 import ChatBot from './ChatBot';
-import GamificationPanel from './GamificationPanel';
 import ResumeBuilder from './ResumeBuilder';
 
 interface DashboardProps {
   data: AnalysisResult;
   currentSkills: Skill[];
   onReset: () => void;
-  onOpenProfile: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset, onOpenProfile }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) => {
   
   const getImportanceColor = (imp: string) => {
     switch (imp) {
@@ -66,12 +63,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset, onO
         </div>
       </div>
 
-      {/* Gamification Panel */}
-      <GamificationPanel data={data} onOpenProfile={onOpenProfile} />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Market Demand Visualization (Replaced Chart with Clean List) */}
+        {/* Market Demand Visualization */}
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
           <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>

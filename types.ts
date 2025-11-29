@@ -56,17 +56,17 @@ export interface ResumeInsights {
   keywords: string[];
 }
 
-export interface Badge {
-  id: string;
-  title: string;
-  description: string;
-  iconName: 'Award' | 'TrendingUp' | 'Zap' | 'Crown' | 'Map' | 'Star';
-  colorClass: string;
-  dateEarned: string;
-}
-
 export interface User {
   id: string;
   name: string;
   email: string;
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  iconName: string;
+  colorClass: string;
+  dateEarned: string;
 }
