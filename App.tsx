@@ -1,21 +1,53 @@
-import React, { useState } from 'react';
-import { AnalysisResult, AppState, Skill } from './types';
+import React, { useState, useEffect } from 'react';
+import { AnalysisResult, AppState, Skill, User } from './types';
 import { analyzeSkillGap } from './services/geminiService';
+import { calculateBadges, saveBadges } from './services/gamificationService';
+import { authService } from './services/authService';
 import AnalysisInput from './components/AnalysisInput';
 import Dashboard from './components/Dashboard';
-import { Compass, Github, AlertTriangle } from 'lucide-react';
+import ProfileModal from './components/ProfileModal';
+import AuthScreen from './components/AuthScreen';
+import { Compass, Github, AlertTriangle, User as UserIcon, LogOut } from 'lucide-react';
 
 const App: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [currentSkills, setCurrentSkills] = useState<Skill[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  useEffect(() => {
+    // Check for existing session on mount
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  }, []);
+
+  const handleLogin = (user: User) => {
+    setUser(user);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    handleReset();
+    setIsProfileOpen(false);
+  };
 
   const handleAnalyze = async (role: string, skills: Skill[], context: string) => {
+    if (!user) return;
+    
     setAppState(AppState.ANALYZING);
     setCurrentSkills(skills); // Store skills for resume builder
     try {
       const result = await analyzeSkillGap(role, skills, context);
+      
+      // Save earned badges to local storage for the current user
+      const earnedBadges = calculateBadges(result);
+      saveBadges(user.id, earnedBadges);
+
       setAnalysisResult(result);
       setAppState(AppState.RESULTS);
     } catch (error) {
@@ -32,6 +64,11 @@ const App: React.FC = () => {
     setAppState(AppState.IDLE);
   };
 
+  // If no user is logged in, show the Auth Screen
+  if (!user) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 pb-12">
       {/* Navigation */}
@@ -45,12 +82,36 @@ const App: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
              <span className="text-xs text-slate-500 hidden sm:inline">Powered by Gemini 2.5 Flash</span>
-             <a href="#" className="text-slate-400 hover:text-white transition-colors">
+             
+             {/* Profile Button */}
+             <button 
+              onClick={() => setIsProfileOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-slate-700"
+              title="Your Profile"
+             >
+                <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                  <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+                </div>
+                <span className="text-sm font-medium text-slate-300 hidden md:block">{user.name}</span>
+             </button>
+
+             {/* Logout Button */}
+             <button
+               onClick={handleLogout}
+               className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors"
+               title="Sign Out"
+             >
+               <LogOut className="w-5 h-5" />
+             </button>
+
+             <a href="#" className="text-slate-400 hover:text-white transition-colors ml-1">
                <Github className="w-5 h-5" />
              </a>
           </div>
         </div>
       </nav>
+
+      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">

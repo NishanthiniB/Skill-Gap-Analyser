@@ -9,6 +9,7 @@ export interface LearningResource {
   provider: string;
   estimatedDuration: string;
   description: string;
+  url?: string;
 }
 
 export interface LearningStep {
@@ -53,4 +54,19 @@ export interface ResumeInsights {
   professionalSummary: string;
   achievements: string[];
   keywords: string[];
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  iconName: 'Award' | 'TrendingUp' | 'Zap' | 'Crown' | 'Map' | 'Star';
+  colorClass: string;
+  dateEarned: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
 }

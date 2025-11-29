@@ -1,7 +1,7 @@
 import React from 'react';
 import { AnalysisResult, MarketGap, Skill } from '../types';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import { CheckCircle2, AlertCircle, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
+import { CheckCircle2, AlertCircle, BookOpen, ExternalLink, ArrowRight, PlayCircle } from 'lucide-react';
 import ChatBot from './ChatBot';
 import GamificationPanel from './GamificationPanel';
 import ResumeBuilder from './ResumeBuilder';
@@ -28,6 +28,16 @@ const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) =
       case 'Medium': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
       default: return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
     }
+  };
+
+  const getProviderStyle = (provider: string) => {
+    const p = provider.toLowerCase();
+    if (p.includes('coursera')) return 'text-[#0056D2] bg-[#0056D2]/10 border-[#0056D2]/20';
+    if (p.includes('udemy')) return 'text-[#A435F0] bg-[#A435F0]/10 border-[#A435F0]/20';
+    if (p.includes('edx')) return 'text-[#D0304C] bg-[#D0304C]/10 border-[#D0304C]/20';
+    if (p.includes('pluralsight')) return 'text-[#F15B2A] bg-[#F15B2A]/10 border-[#F15B2A]/20';
+    if (p.includes('youtube') || p.includes('video')) return 'text-[#FF0000] bg-[#FF0000]/10 border-[#FF0000]/20';
+    return 'text-slate-400 bg-slate-700/50 border-slate-600';
   };
 
   return (
@@ -163,20 +173,39 @@ const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) =
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {step.resources.map((resource, rIdx) => (
-                      <div key={rIdx} className="group flex flex-col p-4 bg-slate-800 rounded-lg border border-slate-700/50 hover:bg-slate-800/80 transition-all cursor-pointer">
-                        <div className="flex justify-between items-start mb-2">
-                           <span className="text-xs font-semibold px-2 py-1 bg-slate-700 rounded text-slate-300">{resource.type}</span>
+                      <a 
+                        key={rIdx} 
+                        href={resource.url || "#"} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group flex flex-col p-4 bg-slate-800 rounded-lg border border-slate-700/50 hover:bg-slate-800/80 transition-all cursor-pointer relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 left-0 w-1 h-full bg-slate-700 group-hover:bg-indigo-500 transition-colors"></div>
+                        
+                        <div className="flex justify-between items-start mb-2 pl-2">
+                           <span className={`text-xs font-semibold px-2 py-1 rounded border ${getProviderStyle(resource.provider)}`}>
+                             {resource.type}
+                           </span>
                            <span className="text-xs text-slate-500">{resource.estimatedDuration}</span>
                         </div>
-                        <h5 className="font-medium text-slate-200 mb-1 group-hover:text-indigo-300 transition-colors">{resource.title}</h5>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                           <span className="text-indigo-400">{resource.provider}</span>
+                        
+                        <h5 className="font-medium text-slate-200 mb-1 pl-2 group-hover:text-indigo-300 transition-colors flex items-center gap-2">
+                          {resource.title}
+                          {resource.type === 'Video' && <PlayCircle className="w-3 h-3 inline opacity-70" />}
+                        </h5>
+                        
+                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2 pl-2">
+                           <span className={getProviderStyle(resource.provider).split(' ')[0]}>{resource.provider}</span>
                         </div>
-                        <p className="text-xs text-slate-500 line-clamp-2 mb-2">{resource.description}</p>
+                        
+                        <p className="text-xs text-slate-500 line-clamp-2 mb-2 pl-2">{resource.description}</p>
+                        
                         <div className="mt-auto pt-2 flex justify-end">
-                           <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-white transition-colors" />
+                           <span className="flex items-center text-xs font-medium text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                             View Resource <ExternalLink className="w-3 h-3 ml-1" />
+                           </span>
                         </div>
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>

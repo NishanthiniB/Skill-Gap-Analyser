@@ -33,6 +33,12 @@ export const analyzeSkillGap = async (
     4. Create a structured learning path to bridge these gaps.
     5. Estimate a match score (0-100).
     
+    CRITICAL RESOURCE INSTRUCTIONS:
+    - For the "learningPath" resources, you MUST recommend specific, real-world courses from major MOOC providers (Coursera, Udemy, edX, Pluralsight, Udacity).
+    - Provide the exact "title" of the course.
+    - Provide a "url" for the resource. If you know the direct link, use it. If not, generate a high-quality search URL for that platform (e.g., "https://www.coursera.org/search?query=React+Basics").
+    - Ensure a mix of free and paid resources if possible.
+
     Output the result in strict JSON format matching the schema provided.
     Ensure "topSkillsRequired" includes both technical and soft skills relevant to the role.
     "marketSummary" should be a concise paragraph about the current state of this role in the industry.
@@ -91,6 +97,7 @@ export const analyzeSkillGap = async (
                         provider: { type: Type.STRING },
                         estimatedDuration: { type: Type.STRING },
                         description: { type: Type.STRING },
+                        url: { type: Type.STRING, description: "Direct URL or search URL for the resource" },
                       },
                     },
                   },
