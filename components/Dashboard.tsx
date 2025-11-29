@@ -1,15 +1,18 @@
 import React from 'react';
-import { AnalysisResult, MarketGap } from '../types';
+import { AnalysisResult, MarketGap, Skill } from '../types';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 import { CheckCircle2, AlertCircle, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
 import ChatBot from './ChatBot';
+import GamificationPanel from './GamificationPanel';
+import ResumeBuilder from './ResumeBuilder';
 
 interface DashboardProps {
   data: AnalysisResult;
+  currentSkills: Skill[];
   onReset: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, currentSkills, onReset }) => {
   
   // Transform data for charts
   const radarData = data.topSkillsRequired.map(skill => ({
@@ -58,6 +61,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
            </div>
         </div>
       </div>
+
+      {/* Gamification Panel */}
+      <GamificationPanel data={data} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
@@ -125,6 +131,9 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
           </div>
         </div>
       </div>
+
+      {/* Resume Builder */}
+      <ResumeBuilder role={data.jobTitle} skills={currentSkills} />
 
       {/* Learning Path */}
       <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-lg">

@@ -48,3 +48,9 @@ export interface ChatMessage {
   text: string;
   isStreaming?: boolean;
 }
+
+export interface ResumeInsights {
+  professionalSummary: string;
+  achievements: string[];
+  keywords: string[];
+}

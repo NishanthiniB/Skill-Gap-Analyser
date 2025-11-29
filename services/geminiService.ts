@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-import { AnalysisResult, Skill } from "../types";
+import { AnalysisResult, Skill, ResumeInsights } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -144,4 +144,53 @@ export const createChatSession = (analysisResult: AnalysisResult): Chat => {
       systemInstruction,
     }
   });
+};
+
+export const generateResumeInsights = async (
+  role: string,
+  skills: Skill[]
+): Promise<ResumeInsights> => {
+  const model = "gemini-2.5-flash";
+  const skillNames = skills.map(s => s.name).join(', ');
+
+  const prompt = `
+    Role: ${role}
+    User Skills: ${skillNames}
+
+    Act as an expert Resume Writer and ATS (Applicant Tracking System) Specialist.
+    
+    Task:
+    1. Write a professional, high-impact summary (max 3 sentences) for this user applying for the specific Role. Focus on their strengths based on the skills provided.
+    2. Write 4 example achievement bullet points that incorporate these skills effectively. Use strong action verbs.
+    3. List 6-8 ATS keywords that are crucial for this role and match the user's provided skills.
+
+    Output strict JSON.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            professionalSummary: { type: Type.STRING },
+            achievements: { type: Type.ARRAY, items: { type: Type.STRING } },
+            keywords: { type: Type.ARRAY, items: { type: Type.STRING } }
+          },
+          required: ["professionalSummary", "achievements", "keywords"]
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No response from AI");
+    
+    return JSON.parse(text) as ResumeInsights;
+  } catch (error) {
+    console.error("Gemini Resume Generation Failed:", error);
+    throw error;
+  }
 };

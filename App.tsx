@@ -8,10 +8,12 @@ import { Compass, Github, AlertTriangle } from 'lucide-react';
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [currentSkills, setCurrentSkills] = useState<Skill[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   const handleAnalyze = async (role: string, skills: Skill[], context: string) => {
     setAppState(AppState.ANALYZING);
+    setCurrentSkills(skills); // Store skills for resume builder
     try {
       const result = await analyzeSkillGap(role, skills, context);
       setAnalysisResult(result);
@@ -26,6 +28,7 @@ const App: React.FC = () => {
   const handleReset = () => {
     setAnalysisResult(null);
     setErrorMsg('');
+    setCurrentSkills([]);
     setAppState(AppState.IDLE);
   };
 
@@ -78,7 +81,11 @@ const App: React.FC = () => {
         )}
 
         {appState === AppState.RESULTS && analysisResult && (
-          <Dashboard data={analysisResult} onReset={handleReset} />
+          <Dashboard 
+            data={analysisResult} 
+            currentSkills={currentSkills}
+            onReset={handleReset} 
+          />
         )}
 
         {appState === AppState.ERROR && (
